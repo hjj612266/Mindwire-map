@@ -1,0 +1,155 @@
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+#app {
+  animation: fadeIn 0.3s ease;
+}
+
+#top-bar {
+  transition: background var(--transition-base), border-color var(--transition-base);
+}
+
+#status-bar {
+  transition: background var(--transition-base), border-color var(--transition-base);
+}
+
+.empty-state {
+  animation: fadeIn 0.5s ease 0.1s both;
+}
+
+.empty-icon {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.logo-icon {
+  transition: color var(--transition-base), filter var(--transition-base);
+  filter: drop-shadow(0 0 6px var(--primary-dim));
+}
+
+.logo-icon path {
+  animation: logoStrokeGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoStrokeGlow {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+.logo-icon circle {
+  animation: logoNodePulse 3s ease-in-out infinite;
+}
+
+.logo-icon circle:nth-child(2) { animation-delay: 0s; }
+.logo-icon circle:nth-child(3) { animation-delay: 0.5s; }
+.logo-icon circle:nth-child(4) { animation-delay: 1s; }
+.logo-icon circle:nth-child(5) { animation-delay: 1.5s; }
+.logo-icon circle:nth-child(6) { animation-delay: 2s; }
+
+@keyframes logoNodePulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+[data-theme] {
+  transition: color var(--transition-slow), background var(--transition-slow);
+}
+
+[data-theme] * {
+  transition: background-color var(--transition-slow), border-color var(--transition-slow), color var(--transition-slow);
+}
+
+body {
+  background: var(--bg-dark);
+}
+
+::selection {
+  background: var(--primary-dim);
+  color: var(--text-primary);
+}
+
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+#bgCanvas {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+#bgCanvas.ready {
+  opacity: 1;
+}
+
+#particleCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+#particleCanvas.ready {
+  opacity: 1;
+}
+
+.canvas-container {
+  background: radial-gradient(ellipse at 50% 30%, var(--primary-dim) 0%, transparent 60%);
+}
+
+#statusText .fa-regular,
+#statusText .fa-solid {
+  transition: color var(--transition-base);
+}
