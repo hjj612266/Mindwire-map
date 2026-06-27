@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mindwire</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'><path d='M4 28V4L16 16L28 4V28' stroke='%234bcfa0' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='4' cy='4' r='2' fill='%234bcfa0'/><circle cx='4' cy='28' r='2' fill='%234bcfa0'/><circle cx='28' cy='4' r='2' fill='%234bcfa0'/><circle cx='28' cy='28' r='2' fill='%234bcfa0'/><circle cx='16' cy='16' r='2' fill='%234bcfa0'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/effects.css">
+  <link rel="stylesheet" href="css/canvas.css">
+  <link rel="stylesheet" href="css/tools.css">
+</head>
+<body>
+  <div id="app">
+    <header id="top-bar">
+      <div class="top-bar-left">
+        <div class="logo-area">
+          <svg viewBox="0 0 32 32" width="22" height="22" class="logo-icon" aria-hidden="true">
+            <path d="M4 28V4L16 16L28 4V28" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <circle cx="4" cy="4" r="2" fill="currentColor"/>
+            <circle cx="4" cy="28" r="2" fill="currentColor"/>
+            <circle cx="28" cy="4" r="2" fill="currentColor"/>
+            <circle cx="28" cy="28" r="2" fill="currentColor"/>
+            <circle cx="16" cy="16" r="2" fill="currentColor"/>
+          </svg>
+          <span class="system-name">Mindwire</span>
+          <span class="version-badge">V1.1.0</span>
+        </div>
+      </div>
+      <div class="top-bar-center">
+        <span id="currentMapName" class="map-name-label">未命名画布</span>
+        <button class="btn btn-ghost btn-icon" id="mapManagerBtn" title="画布管理">
+          <i class="fa-solid fa-layer-group"></i>
+        </button>
+        <button class="btn btn-ghost" id="addCardBtn" title="添加卡片 (双击画布)">
+          <i class="fa-solid fa-plus"></i> 添加卡片
+        </button>
+      </div>
+      <div class="top-bar-right">
+        <button class="btn btn-ghost btn-icon" id="themeToggle" title="切换主题">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button class="btn btn-ghost btn-icon" id="settingsBtn" title="设置">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </header>
+
+    <div id="main-container">
+      <div id="content-area" class="view-content active">
+        <div class="canvas-container" id="canvasContainer">
+          <canvas id="bgCanvas"></canvas>
+          <canvas id="particleCanvas"></canvas>
+          <div class="canvas-inner" id="canvasInner"></div>
+          <div class="empty-state" id="emptyState">
+            <i class="fa-solid fa-diagram-project empty-icon"></i>
+          </div>
+          <div class="float-hint" id="floatHint">
+            <i class="fa-regular fa-hand-pointer"></i> 双击创建卡片
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer id="status-bar">
+      <span id="statusText"><i class="fa-regular fa-circle-check"></i> 就绪</span>
+      <span class="copyright">&copy; Simon Huang, MIT</span>
+      <span id="statusDataInfo"></span>
+    </footer>
+  </div>
+
+  <div id="mapDrawerBackdrop" class="drawer-backdrop"></div>
+  <div id="mapDrawer" class="map-drawer">
+    <div class="map-drawer-header">
+      <span class="map-drawer-title"><i class="fa-solid fa-layer-group"></i> 画布管理</span>
+      <button class="btn btn-ghost btn-icon" id="closeMapDrawer"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="map-drawer-body" id="mapList"></div>
+    <div class="map-drawer-footer">
+      <button class="btn btn-primary" id="createMapBtn"><i class="fa-solid fa-plus"></i> 新建画布</button>
+    </div>
+  </div>
+
+  <div id="settingsBackdrop" class="drawer-backdrop"></div>
+  <div class="settings-popup" id="settingsPopup">
+    <div class="settings-popup-header">
+      <span class="settings-popup-title"><i class="fa-solid fa-palette"></i> 系统光效</span>
+      <button class="btn btn-ghost btn-icon" id="closeSettings"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="settings-popup-body">
+      <label class="settings-label">光效颜色</label>
+      <div class="color-swatches" id="colorSwatches">
+        <button class="color-swatch" data-accent="green" style="--swatch:#4bcfa0" title="绿色"></button>
+        <button class="color-swatch" data-accent="orange" style="--swatch:#ff9f43" title="橙色"></button>
+        <button class="color-swatch" data-accent="blue" style="--swatch:#54a0ff" title="蓝色"></button>
+        <button class="color-swatch" data-accent="white" style="--swatch:#e2e8f0" title="白色"></button>
+        <button class="color-swatch" data-accent="purple" style="--swatch:#a29bfe" title="紫色"></button>
+        <button class="color-swatch" data-accent="red" style="--swatch:#ff6b6b" title="红色"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/card.js"></script>
+  <script src="js/connection.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/map-manager.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

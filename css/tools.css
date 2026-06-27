@@ -1,0 +1,640 @@
+.tool-floating-btn {
+  position: fixed;
+  right: 20px;
+  top: 70px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--primary);
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px var(--primary-dim), var(--shadow-md);
+  transition: all var(--transition-fast);
+  animation: toolBtnPulse 3s ease-in-out infinite;
+}
+
+.tool-floating-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 24px var(--primary-dim), var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+@keyframes toolBtnPulse {
+  0%, 100% { box-shadow: 0 0 8px var(--primary-dim), var(--shadow-md); }
+  50% { box-shadow: 0 0 20px var(--primary-dim), 0 0 40px rgba(var(--primary-rgb), 0.06), var(--shadow-md); }
+}
+
+.tool-drawer {
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 300px;
+  height: 100vh;
+  background: var(--bg-surface-solid);
+  border-left: 1px solid var(--border-color-faint);
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  transition: right var(--transition-base);
+  box-shadow: var(--shadow-lg);
+}
+
+.tool-drawer.open {
+  right: 0;
+}
+
+.tool-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color-faint);
+  flex-shrink: 0;
+}
+
+.tool-drawer-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.tool-drawer-title i {
+  color: var(--primary);
+}
+
+.tool-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.tool-section {
+  margin-bottom: 20px;
+}
+
+.tool-section-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 4px 12px;
+  border-bottom: 1px solid var(--border-color-subtle);
+  margin-bottom: 12px;
+}
+
+.icon-palette {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.palette-icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 6px 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  background: var(--hover-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.palette-icon-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, var(--primary-dim) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.palette-icon-item:hover {
+  background: var(--hover-bg-strong);
+  border-color: var(--border-color);
+  transform: translateY(-2px);
+}
+
+.palette-icon-item:hover::before {
+  opacity: 1;
+}
+
+.palette-icon-item i {
+  font-size: 24px;
+  color: var(--primary);
+  filter: drop-shadow(0 0 6px rgba(var(--primary-rgb), 0.4));
+  position: relative;
+  z-index: 1;
+}
+
+.palette-icon-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+}
+
+.tool-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--hover-bg);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tool-action-btn:hover {
+  background: var(--hover-bg-strong);
+  border-color: var(--primary);
+  color: var(--primary);
+  border-style: solid;
+}
+
+.tool-action-btn i {
+  font-size: 18px;
+}
+
+.canvas-icon {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 100000;
+  border-radius: 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.12);
+  transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
+  user-select: none;
+}
+
+.canvas-icon:hover {
+  box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.2), 0 0 40px rgba(var(--primary-rgb), 0.06) !important;
+  border-color: var(--primary);
+  transform: scale(1.12) !important;
+  animation: none !important;
+}
+
+.canvas-icon:active {
+  cursor: grabbing;
+}
+
+.canvas-icon i {
+  font-size: 22px;
+  color: var(--primary);
+  filter: drop-shadow(0 0 4px rgba(var(--primary-rgb), 0.5));
+  pointer-events: none;
+}
+
+.canvas-icon.anim-breathing {
+  animation: iconBreathing 3s ease-in-out infinite;
+}
+
+.canvas-icon.anim-pulse {
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+.canvas-icon.anim-glitch {
+  animation: iconGlitch 0.7s steps(1) infinite;
+}
+
+.canvas-icon.anim-float {
+  animation: iconFloat 3.2s ease-in-out infinite;
+}
+
+.canvas-icon.anim-tremble {
+  animation: iconTremble 2s ease-in-out infinite;
+}
+
+.canvas-icon.anim-rotate {
+  animation: iconRotate 3.5s ease-in-out infinite;
+}
+
+.canvas-icon.anim-sparkle {
+  animation: iconSparkle 1.8s ease-in-out infinite;
+}
+
+@keyframes iconBreathing {
+  0%, 100% { box-shadow: 0 0 6px rgba(var(--primary-rgb), 0.08); }
+  50% { box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.25), 0 0 40px rgba(var(--primary-rgb), 0.08); }
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 6px rgba(var(--primary-rgb), 0.08); }
+  50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.25); }
+}
+
+@keyframes iconGlitch {
+  0% { opacity: 1; transform: scale(1); filter: hue-rotate(0deg); }
+  25% { opacity: 0.6; transform: scale(1.03) translate(1px, 0); filter: hue-rotate(30deg); }
+  50% { opacity: 1; transform: scale(0.97) translate(-1px, 0); filter: hue-rotate(-20deg); }
+  75% { opacity: 0.7; transform: scale(1.02); filter: hue-rotate(15deg); }
+  100% { opacity: 1; transform: scale(1); filter: hue-rotate(0deg); }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(var(--primary-rgb), 0.15); }
+}
+
+@keyframes iconTremble {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-1px, 1px); }
+  30% { transform: translate(1px, -1px); }
+  45% { transform: translate(-1px, -1px); }
+  60% { transform: translate(1px, 1px); }
+  75% { transform: translate(0, 1px); }
+  90% { transform: translate(-1px, 0); }
+}
+
+@keyframes iconRotate {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(4deg); }
+  70% { transform: rotate(-4deg); }
+}
+
+@keyframes iconSparkle {
+  0%, 100% { box-shadow: 0 0 4px rgba(var(--primary-rgb), 0.05), 0 0 0 transparent; }
+  25% { box-shadow: 0 0 16px rgba(var(--primary-rgb), 0.35), 0 0 32px rgba(var(--primary-rgb), 0.12); }
+  50% { box-shadow: 0 0 4px rgba(var(--primary-rgb), 0.08), 0 0 8px rgba(var(--primary-rgb), 0.03); }
+  75% { box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3), 0 0 40px rgba(var(--primary-rgb), 0.1); }
+}
+
+.icon-delete-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 13px;
+  color: var(--danger);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 2px;
+  display: none;
+  z-index: 100001;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  line-height: 1;
+}
+
+.canvas-icon:hover .icon-delete-btn {
+  display: block;
+  opacity: 1;
+}
+
+.icon-delete-btn:hover {
+  opacity: 0.8;
+}
+
+.checklist-tool {
+  position: absolute;
+  width: 270px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color-dim);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  z-index: 500;
+  cursor: default;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+  user-select: none;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.checklist-tool:hover {
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-md), 0 0 12px rgba(var(--primary-rgb), 0.06);
+}
+
+.checklist-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px 8px 6px;
+  min-height: 36px;
+  border-bottom: 1px solid var(--border-color-subtle);
+}
+
+.checklist-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 28px;
+  color: var(--text-dim);
+  cursor: grab;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.checklist-drag-handle i {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.checklist-tool:hover .checklist-drag-handle i {
+  opacity: 0.5;
+}
+
+.checklist-drag-handle:hover i {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
+.checklist-title {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  min-width: 0;
+  word-break: break-word;
+  cursor: text;
+  padding: 2px 4px;
+}
+
+.checklist-title:empty::before {
+  content: '子任务列表';
+  color: var(--text-dim);
+}
+
+.checklist-title:focus {
+  outline: none;
+}
+
+.checklist-delete-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 11px;
+  transition: all var(--transition-fast);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.checklist-tool:hover .checklist-delete-btn {
+  opacity: 1;
+}
+
+.checklist-delete-btn:hover {
+  color: var(--danger);
+  background: var(--hover-bg);
+}
+
+.checklist-save-btn {
+  display: none;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--success) !important;
+  font-size: 11px;
+  transition: all var(--transition-fast);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checklist-tool.dirty .checklist-save-btn {
+  display: flex;
+}
+
+.checklist-save-btn:hover {
+  background: rgba(var(--primary-rgb), 0.18);
+}
+
+.checklist-tool .anchor {
+  border-color: var(--bg-card);
+}
+
+.checklist-tool:hover .anchor {
+  opacity: 1;
+}
+
+.checklist-items {
+  padding: 4px 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  transition: background var(--transition-fast);
+  border-radius: var(--radius-sm);
+  margin: 1px 6px;
+}
+
+.checklist-item:hover {
+  background: var(--hover-bg);
+}
+
+.checklist-item.done .checklist-item-text {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+
+.checklist-cb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 3px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  background: transparent;
+  position: relative;
+}
+
+.checklist-cb:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.checklist-cb:checked::after {
+  content: '\f00c';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 10px;
+  color: var(--bg-surface-solid);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.checklist-cb:hover {
+  border-color: var(--primary);
+}
+
+.checklist-item-text {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.4;
+  cursor: text;
+  min-width: 0;
+  word-break: break-word;
+  padding: 1px 2px;
+}
+
+.checklist-item-text:focus {
+  outline: none;
+  background: var(--hover-bg);
+  border-radius: 2px;
+}
+
+.checklist-item-del {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 9px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  opacity: 0;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.checklist-item:hover .checklist-item-del {
+  opacity: 1;
+}
+
+.checklist-item-del:hover {
+  color: var(--danger);
+}
+
+.checklist-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border-color-subtle);
+}
+
+.checklist-input {
+  flex: 1;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  font-family: var(--font-sans);
+}
+
+.checklist-input::placeholder {
+  color: var(--text-dim);
+}
+
+.checklist-input:focus {
+  border-color: var(--border-color);
+}
+
+.checklist-add-btn {
+  padding: 6px 12px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--primary-dim);
+  color: var(--primary);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  font-family: var(--font-sans);
+}
+
+.checklist-add-btn:hover {
+  background: var(--primary);
+  color: var(--bg-surface-solid);
+}
+
+.palette-drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.palette-drag-ghost.icon-ghost {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--primary);
+  box-shadow: 0 0 24px rgba(var(--primary-rgb), 0.35);
+}
+
+.palette-drag-ghost.icon-ghost i {
+  font-size: 22px;
+  color: var(--primary);
+  filter: drop-shadow(0 0 6px rgba(var(--primary-rgb), 0.5));
+}
+
+.palette-drag-ghost.tool-ghost {
+  width: 150px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1.5px solid var(--primary);
+  box-shadow: 0 0 24px rgba(var(--primary-rgb), 0.35);
+  font-size: var(--font-size-sm);
+  color: var(--primary);
+  gap: 6px;
+  font-weight: 500;
+}
+
+.palette-drag-ghost.tool-ghost i {
+  font-size: 16px;
+}

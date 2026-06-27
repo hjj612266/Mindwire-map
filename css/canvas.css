@@ -1,0 +1,586 @@
+.canvas-container {
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+  background: radial-gradient(ellipse at 50% 30%, var(--primary-dim) 0%, transparent 60%),
+              var(--bg-dark);
+}
+
+.canvas-container:active {
+  cursor: grabbing;
+}
+
+.canvas-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  width: 0;
+  height: 0;
+  z-index: 2;
+}
+
+.card {
+  position: absolute;
+  width: 220px;
+  min-height: 120px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color-dim);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+  z-index: 10;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), background var(--transition-base);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+  user-select: none;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  pointer-events: none;
+  transition: border-color var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-md), 0 0 12px rgba(var(--primary-rgb), 0.08);
+}
+
+.card.selected {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md), 0 0 20px var(--primary-dim);
+}
+
+.card.selected::before {
+  border-color: var(--primary);
+}
+
+.card.dragging {
+  box-shadow: var(--shadow-lg);
+  transform: scale(1.02);
+  z-index: 100 !important;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px 6px 6px;
+  cursor: grab;
+  min-height: 36px;
+  border-bottom: 1px solid var(--border-color-subtle);
+}
+
+.card:active .card-header {
+  cursor: grabbing;
+}
+
+.card-drag-grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 28px;
+  color: var(--text-dim);
+  cursor: grab;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  margin-right: 2px;
+}
+
+.card-drag-grip i {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.card:hover .card-drag-grip i,
+.card.selected .card-drag-grip i {
+  opacity: 0.5;
+}
+
+.card-drag-grip:hover i {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
+.card-drag-grip:hover {
+  background: var(--hover-bg);
+}
+
+.card-title {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  min-width: 0;
+  word-break: break-word;
+  cursor: text;
+}
+
+.card-title:empty::before {
+  content: '新节点';
+  color: var(--text-dim);
+}
+
+.card-title:focus {
+  outline: none;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.card:hover .card-actions,
+.card.selected .card-actions {
+  opacity: 1;
+}
+
+.card-action-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 11px;
+  transition: all var(--transition-fast);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.card-action-btn:hover {
+  color: var(--text-secondary);
+  background: var(--hover-bg);
+}
+
+.card-action-btn.danger:hover {
+  color: var(--danger);
+}
+
+.card-save-btn {
+  display: none;
+  color: var(--success) !important;
+}
+
+.card.dirty .card-action-btn.card-save-btn {
+  display: flex;
+}
+
+.card-save-btn:hover {
+  background: rgba(var(--primary-rgb), 0.18) !important;
+}
+
+@keyframes borderGlow {
+  0% { box-shadow: 0 0 0 0 transparent; }
+  10% { box-shadow: 0 -5px 14px 3px var(--primary), 0 0 0 0 transparent, 0 0 0 0 transparent, 0 0 0 0 transparent; }
+  28% { box-shadow: 0 0 0 0 transparent, 5px 0 14px 3px var(--primary), 0 0 0 0 transparent, 0 0 0 0 transparent; }
+  45% { box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent, 0 5px 14px 3px var(--primary), 0 0 0 0 transparent; }
+  63% { box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent, 0 0 0 0 transparent, -5px 0 14px 3px var(--primary); }
+  80% { box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent, 0 0 0 0 transparent, 0 0 0 0 transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.card.glow-ring {
+  animation: borderGlow 0.55s ease-out forwards;
+}
+
+.card.glow-ring .card-header {
+  border-bottom-color: transparent;
+  transition: border-bottom-color 0.01s 0.55s;
+}
+
+.card-resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  height: 24px;
+  cursor: nwse-resize;
+  z-index: 25;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 3px;
+}
+
+.card:hover .card-resize-handle,
+.card.selected .card-resize-handle {
+  opacity: 1;
+}
+
+.card-resize-handle:hover {
+  opacity: 1;
+}
+
+.card-resize-handle::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid var(--text-dim);
+  border-bottom: 2px solid var(--text-dim);
+  border-radius: 1px;
+  transition: border-color var(--transition-fast);
+}
+
+.card-resize-handle:hover::after {
+  border-color: var(--primary);
+  border-width: 2.5px;
+}
+
+.card-body {
+  padding: 8px 12px 12px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  min-height: 48px;
+  cursor: text;
+  word-break: break-word;
+  flex: 1;
+}
+
+.card-body:empty::before {
+  content: '双击编辑描述…';
+  color: var(--text-dim);
+}
+
+.card-body:focus {
+  outline: none;
+}
+
+
+.anchor {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--anchor-default);
+  border: 2px solid var(--bg-card);
+  cursor: crosshair;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  transition: all var(--transition-fast);
+  opacity: 0;
+}
+
+.card:hover .anchor,
+.card.selected .anchor {
+  opacity: 1;
+}
+
+.anchor:hover {
+  background: var(--anchor-hover);
+  transform: translate(-50%, -50%) scale(1.5);
+  box-shadow: 0 0 8px var(--anchor-hover);
+}
+
+.anchor.active-drag {
+  background: var(--warning);
+  transform: translate(-50%, -50%) scale(1.8);
+  box-shadow: 0 0 12px var(--warning);
+}
+
+.anchor.highlight-drop {
+  background: var(--anchor-hover);
+  transform: translate(-50%, -50%) scale(2);
+  box-shadow: 0 0 16px var(--anchor-hover);
+}
+
+.anchor-top {
+  top: 0;
+  left: 50%;
+}
+
+.anchor-bottom {
+  top: 100%;
+  left: 50%;
+}
+
+.anchor-left {
+  top: 50%;
+  left: 0;
+}
+
+.anchor-right {
+  top: 50%;
+  left: 100%;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.card.entering {
+  animation: cardEnter 0.25s ease-out both;
+}
+
+@keyframes cardExit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.card.exiting {
+  animation: cardExit 0.2s ease-in both;
+  pointer-events: none;
+}
+
+.color-picker-popup {
+  position: fixed;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  animation: scaleIn 0.12s ease both;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.color-swatch:hover {
+  transform: scale(1.2);
+  border-color: var(--text-muted);
+}
+
+.color-swatch.active {
+  border-color: var(--text-primary);
+}
+
+.color-swatch-none {
+  background: var(--bg-surface-solid);
+  border-color: var(--border-color);
+  position: relative;
+}
+
+.color-swatch-none::after {
+  content: '\f7a4';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.connections-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 3;
+}
+
+.connections-svg marker polygon {
+  fill: var(--line-color);
+  transition: fill var(--transition-slow);
+}
+
+.conn-group {
+  transition: opacity 0.3s ease;
+}
+
+.conn-hit {
+  cursor: pointer;
+  pointer-events: stroke;
+}
+
+.conn-line {
+  transition: stroke var(--transition-base), stroke-width var(--transition-fast);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.conn-flow {
+  animation: connFlowFwd 0.8s linear infinite;
+  stroke-linecap: round;
+}
+
+@keyframes connFlowFwd {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -48; }
+}
+
+.conn-breath-glow {
+  animation: breathPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes breathPulse {
+  0%, 100% { opacity: 0.08; stroke-width: 4; }
+  50% { opacity: 0.35; stroke-width: 8; }
+}
+
+.conn-style-popup {
+  position: fixed;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  min-width: 150px;
+  animation: scaleIn 0.1s ease both;
+}
+
+.conn-popup-title {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  padding: 4px 8px 6px;
+  border-bottom: 1px solid var(--border-color-subtle);
+  margin-bottom: 4px;
+}
+
+.conn-style-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.conn-style-btn:hover {
+  background: var(--hover-bg-strong);
+  color: var(--text-primary);
+}
+
+.conn-style-btn.active {
+  color: var(--primary);
+  background: var(--primary-dim);
+}
+
+.conn-delete-btn {
+  color: var(--danger);
+}
+
+.conn-delete-btn:hover {
+  background: rgba(255, 107, 107, 0.12);
+  color: var(--danger);
+}
+
+.conn-style-indicator {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.conn-style-dashed {
+  background: repeating-linear-gradient(90deg, currentColor 0, currentColor 6px, transparent 6px, transparent 10px);
+}
+
+.conn-style-dotted {
+  background: repeating-linear-gradient(90deg, currentColor 0, currentColor 2px, transparent 2px, transparent 6px);
+  height: 2px;
+  border-radius: 1px;
+}
+
+.conn-style-a-to-b {
+  background: currentColor;
+  position: relative;
+}
+
+.conn-style-a-to-b::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 5px solid currentColor;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+}
+
+.conn-style-b-to-a {
+  background: currentColor;
+  position: relative;
+}
+
+.conn-style-b-to-a::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right: 5px solid currentColor;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+}
+
+.conn-style-none .conn-style-indicator {
+  background: transparent;
+  border-top: 1px dashed currentColor;
+  height: 0;
+}
+
+.conn-style-breathing {
+  background: var(--primary-light);
+  position: relative;
+  animation: breathIndicator 2.4s ease-in-out infinite;
+}
+
+@keyframes breathIndicator {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.5); }
+  50% { opacity: 1; transform: scaleY(1.2); }
+}
+
+.conn-popup-divider {
+  height: 1px;
+  background: var(--border-color-subtle);
+  margin: 4px 0;
+}
