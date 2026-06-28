@@ -2,6 +2,7 @@ const DOT_SPACING = 28;
 const DOT_RADIUS = 0.9;
 const MIN_ZOOM = 0.15;
 const MAX_ZOOM = 4;
+const CANVAS_POS_KEY = 'mindwire_canvas_pos';
 
 const CanvasSystem = {
   offsetX: 0,
@@ -23,8 +24,9 @@ const CanvasSystem = {
     this.canvas = document.getElementById('bgCanvas');
     this.ctx = this.canvas.getContext('2d');
     this.inner = document.getElementById('canvasInner');
+    this.loadPosition();
     this.resize();
-    this.render();
+    this.updateTransform();
     this.bindEvents();
     this.canvas.classList.add('ready');
   },
@@ -103,6 +105,23 @@ const CanvasSystem = {
     this.updateTransform();
   },
 
+  savePosition() {
+    try {
+      localStorage.setItem(CANVAS_POS_KEY, JSON.stringify({ offsetX: this.offsetX, offsetY: this.offsetY }));
+    } catch (e) {}
+  },
+
+  loadPosition() {
+    try {
+      const raw = localStorage.getItem(CANVAS_POS_KEY);
+      if (raw) {
+        const pos = JSON.parse(raw);
+        this.offsetX = pos.offsetX || 0;
+        this.offsetY = pos.offsetY || 0;
+      }
+    } catch (e) {}
+  },
+
   bindEvents() {
     let resizeTimer;
     window.addEventListener('resize', () => {
@@ -115,11 +134,13 @@ const CanvasSystem = {
       this.offsetY -= e.deltaY * 0.8;
       this.updateTransform();
       CardSystem.syncPositions();
+      this.savePosition();
     }, { passive: false });
 
     this.container.addEventListener('mousedown', (e) => {
       if (e.button !== 0 && e.button !== 1) return;
-      if (e.target.closest('.card') || e.target.closest('.anchor') || e.target.closest('.color-picker-popup') || e.target.closest('.checklist-tool')) return;
+      if (e.target.closest('.card') || e.target.closest('.anchor') || e.target.closest('.color-picker-popup') || e.target.closest('.checklist-tool') || e.target.closest('.text-tool')) return;
+      if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
       e.preventDefault();
       this.isPanning = true;
       this.panStartX = e.clientX;
@@ -143,14 +164,17 @@ const CanvasSystem = {
       if (this.isPanning) {
         this.isPanning = false;
         this.container.style.cursor = 'grab';
+        this.savePosition();
       }
     });
 
     this.container.addEventListener('dblclick', (e) => {
-      if (e.target.closest('.card') || e.target.closest('.anchor') || e.target.closest('.checklist-tool')) return;
+      if (e.target.closest('.card') || e.target.closest('.anchor') || e.target.closest('.checklist-tool') || e.target.closest('.text-tool')) return;
       const rect = this.container.getBoundingClientRect();
       const world = this.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
       CardSystem.createCard(world.x, world.y);
     });
+
+    window.addEventListener('beforeunload', () => this.savePosition());
   }
 };

@@ -15,6 +15,7 @@ const Store = {
     this._data.maps.forEach(m => {
       if (!m.icons) m.icons = [];
       if (!m.checklistTools) m.checklistTools = [];
+      if (!m.textTools) m.textTools = [];
     });
     if (this._data.maps.length === 0) {
       this.createMap('默认画布');
@@ -99,6 +100,7 @@ const Store = {
       connections: [],
       icons: [],
       checklistTools: [],
+      textTools: [],
       settings: {}
     };
     this._data.maps.push(map);
@@ -274,6 +276,41 @@ const Store = {
     const map = this.getCurrentMap();
     if (map) {
       const tool = map.checklistTools.find(t => t.id === id);
+      if (tool) {
+        Object.assign(tool, updates);
+        map.updatedAt = new Date().toISOString();
+        this.save();
+      }
+    }
+  },
+
+  getTextTools() {
+    const map = this.getCurrentMap();
+    return map ? (map.textTools || []) : [];
+  },
+
+  addTextTool(tool) {
+    const map = this.getCurrentMap();
+    if (map) {
+      map.textTools.push(tool);
+      map.updatedAt = new Date().toISOString();
+      this.save();
+    }
+  },
+
+  deleteTextTool(id) {
+    const map = this.getCurrentMap();
+    if (map) {
+      map.textTools = map.textTools.filter(t => t.id !== id);
+      map.updatedAt = new Date().toISOString();
+      this.save();
+    }
+  },
+
+  updateTextTool(id, updates) {
+    const map = this.getCurrentMap();
+    if (map) {
+      const tool = map.textTools.find(t => t.id === id);
       if (tool) {
         Object.assign(tool, updates);
         map.updatedAt = new Date().toISOString();

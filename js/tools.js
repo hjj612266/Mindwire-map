@@ -17,6 +17,10 @@ const ICON_TYPES = [
 ];
 
 const TOOL_WIDTH = 270;
+const TEXT_TOOL_MIN_WIDTH = 120;
+const TEXT_TOOL_MIN_HEIGHT = 60;
+const TEXT_TOOL_DEFAULT_WIDTH = 200;
+const TEXT_TOOL_DEFAULT_HEIGHT = 80;
 
 const ToolSystem = {
   TOOL_ID_OFFSET: 1000000,
@@ -98,6 +102,10 @@ const ToolSystem = {
               <i class="fa-solid fa-list-check"></i>
               <span class="palette-icon-label">子任务列表</span>
             </div>
+            <div class="palette-icon-item" id="addTextToolBtn">
+              <i class="fa-solid fa-font"></i>
+              <span class="palette-icon-label">自定义文本框</span>
+            </div>
           </div>
         </div>
       </div>
@@ -109,6 +117,10 @@ const ToolSystem = {
     document.getElementById('addChecklistBtn').addEventListener('mousedown', (e) => {
       e.preventDefault();
       this.startDrawerDrag(e, 'tool');
+    });
+    document.getElementById('addTextToolBtn').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      this.startDrawerDrag(e, 'text');
     });
   },
 
@@ -192,10 +204,11 @@ const ToolSystem = {
   renderAll() {
     this.renderCanvasIcons();
     this.renderCanvasTools();
+    this.renderCanvasTextTools();
   },
 
   clearAll() {
-    document.querySelectorAll('.canvas-icon, .checklist-tool').forEach(el => el.remove());
+    document.querySelectorAll('.canvas-icon, .checklist-tool, .text-tool').forEach(el => el.remove());
   },
 
   renderCanvasIcons() {
@@ -266,9 +279,12 @@ const ToolSystem = {
       ghost.classList.add('icon-ghost');
       const typeDef = ICON_TYPES.find(t => t.id === iconType) || ICON_TYPES[0];
       ghost.innerHTML = `<i class="fa-solid ${typeDef.icon}"></i>`;
-    } else {
+    } else if (itemType === 'tool') {
       ghost.classList.add('tool-ghost');
       ghost.innerHTML = '<i class="fa-solid fa-list-check"></i> 子任务列表';
+    } else {
+      ghost.classList.add('text-ghost');
+      ghost.innerHTML = '<i class="fa-solid fa-font"></i> 文字';
     }
 
     ghost.style.left = (e.clientX - 22) + 'px';
@@ -290,8 +306,10 @@ const ToolSystem = {
         const world = CanvasSystem.screenToWorld(me.clientX - canvasRect.left, me.clientY - canvasRect.top);
         if (itemType === 'icon') {
           this.placeIcon(iconType, world.x - ICON_SIZE / 2, world.y - ICON_SIZE / 2);
-        } else {
+        } else if (itemType === 'tool') {
           this.createChecklistToolAt(world.x, world.y);
+        } else {
+          this.createTextToolAt(world.x, world.y);
         }
       }
       window.removeEventListener('mousemove', onMove);
@@ -606,5 +624,187 @@ const ToolSystem = {
     const d = document.createElement('div');
     d.textContent = str;
     return d.innerHTML;
+  },
+
+  getTextFontSize(height) {
+    return Math.max(14, Math.round(height * 0.28));
+  },
+
+  createTextToolAt(worldX, worldY) {
+    const tools = Store.getTextTools();
+    const maxId = tools.length > 0 ? Math.max(...tools.map(t => t.id)) : 0;
+    const w = TEXT_TOOL_DEFAULT_WIDTH;
+    const h = TEXT_TOOL_DEFAULT_HEIGHT;
+    const tool = {
+      id: maxId + 1,
+      text: '双击编辑文字',
+      x: worldX - w / 2,
+      y: worldY - h / 2,
+      width: w,
+      height: h,
+      zIndex: 500
+    };
+    Store.addTextTool(tool);
+    this.renderCanvasTextTool(tool);
+    App.updateDataInfo();
+  },
+
+  removeTextTool(id) {
+    const el = document.querySelector(`.text-tool[data-id="${id}"]`);
+    if (el) el.remove();
+    Store.deleteTextTool(id);
+    App.updateDataInfo();
+  },
+
+  renderCanvasTextTools() {
+    const tools = Store.getTextTools();
+    tools.forEach(t => this.renderCanvasTextTool(t));
+  },
+
+  renderCanvasTextTool(tool) {
+    let el = document.querySelector(`.text-tool[data-id="${tool.id}"]`);
+
+    if (el) {
+      el.style.left = tool.x + 'px';
+      el.style.top = tool.y + 'px';
+      el.style.width = tool.width + 'px';
+      el.style.height = tool.height + 'px';
+      el.style.zIndex = tool.zIndex || 500;
+      const content = el.querySelector('.text-tool-content');
+      const fontSize = this.getTextFontSize(tool.height);
+      content.style.fontSize = fontSize + 'px';
+      if (content.textContent !== tool.text) content.textContent = tool.text;
+      return;
+    }
+
+    const fontSize = this.getTextFontSize(tool.height);
+    el = document.createElement('div');
+    el.className = 'text-tool';
+    el.dataset.id = tool.id;
+    el.style.left = tool.x + 'px';
+    el.style.top = tool.y + 'px';
+    el.style.width = tool.width + 'px';
+    el.style.height = tool.height + 'px';
+    el.style.zIndex = tool.zIndex || 500;
+
+    const isDirty = this._dirtyTools.has(tool.id);
+    el.innerHTML = `
+      <div class="text-tool-content" contenteditable="true" style="font-size:${fontSize}px">${this.escHtml(tool.text)}</div>
+      <button class="text-tool-save-btn" title="保存"><i class="fa-solid fa-check"></i></button>
+      <button class="text-tool-delete-btn" title="删除"><i class="fa-solid fa-trash-can"></i></button>
+      <div class="text-tool-resize-handle" title="调整大小"></div>
+    `;
+    if (isDirty) el.classList.add('dirty');
+
+    this.bindTextToolEvents(el, tool);
+
+    CanvasSystem.inner.appendChild(el);
+  },
+
+  bindTextToolEvents(el, tool) {
+    el.querySelector('.text-tool-delete-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.removeTextTool(tool.id);
+    });
+
+    el.querySelector('.text-tool-save-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.handleToolSave(tool.id);
+    });
+
+    const content = el.querySelector('.text-tool-content');
+    content.addEventListener('blur', () => {
+      const text = content.textContent.trim() || '文字';
+      content.textContent = text;
+      Store.updateTextTool(tool.id, { text });
+      this.markToolDirty(tool.id);
+    });
+
+    content.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+    });
+
+    el.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.text-tool-delete-btn') || e.target.closest('.text-tool-save-btn') || e.target.closest('.text-tool-resize-handle')) return;
+      if (e.target === content || content.contains(e.target)) return;
+      e.stopPropagation();
+      this.startTextToolDrag(e, tool.id);
+    });
+
+    const resizeHandle = el.querySelector('.text-tool-resize-handle');
+    resizeHandle.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.startTextToolResize(e, tool.id);
+    });
+  },
+
+  startTextToolDrag(e, toolId) {
+    const tool = Store.getTextTools().find(t => t.id === toolId);
+    if (!tool) return;
+
+    const rect = CanvasSystem.container.getBoundingClientRect();
+    const world = CanvasSystem.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+
+    const newZ = Date.now() + 500;
+    Store.updateTextTool(toolId, { zIndex: newZ });
+    const el = document.querySelector(`.text-tool[data-id="${toolId}"]`);
+    if (el) el.style.zIndex = newZ;
+
+    this.dragState = { type: 'text', id: toolId, offsetX: world.x - tool.x, offsetY: world.y - tool.y };
+
+    const onMove = (me) => {
+      if (!this.dragState || this.dragState.type !== 'text') return;
+      const rect = CanvasSystem.container.getBoundingClientRect();
+      const world = CanvasSystem.screenToWorld(me.clientX - rect.left, me.clientY - rect.top);
+      const newX = world.x - this.dragState.offsetX;
+      const newY = world.y - this.dragState.offsetY;
+      Store.updateTextTool(this.dragState.id, { x: newX, y: newY });
+      const el = document.querySelector(`.text-tool[data-id="${this.dragState.id}"]`);
+      if (el) { el.style.left = newX + 'px'; el.style.top = newY + 'px'; }
+    };
+
+    const onUp = () => {
+      if (this.dragState && this.dragState.type === 'text') Store.saveImmediate();
+      this.dragState = null;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  },
+
+  startTextToolResize(e, toolId) {
+    const tool = Store.getTextTools().find(t => t.id === toolId);
+    if (!tool) return;
+
+    const rect = CanvasSystem.container.getBoundingClientRect();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = tool.width;
+    const startH = tool.height;
+    const startWorldX = tool.x;
+    const startWorldY = tool.y;
+
+    const onMove = (me) => {
+      const worldStart = CanvasSystem.screenToWorld(startX - rect.left, startY - rect.top);
+      const worldCur = CanvasSystem.screenToWorld(me.clientX - rect.left, me.clientY - rect.top);
+      const dw = worldCur.x - worldStart.x;
+      const dh = worldCur.y - worldStart.y;
+      const newW = Math.max(TEXT_TOOL_MIN_WIDTH, startW + dw);
+      const newH = Math.max(TEXT_TOOL_MIN_HEIGHT, startH + dh);
+      Store.updateTextTool(toolId, { width: newW, height: newH });
+      this.renderCanvasTextTool(tool);
+    };
+
+    const onUp = () => {
+      Store.saveImmediate();
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
   }
 };

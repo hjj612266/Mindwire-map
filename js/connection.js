@@ -63,6 +63,7 @@ const ConnectionSystem = {
   },
 
   updateSvgTransform() {
+    if (!this.svg) return;
     this.svg.setAttribute('transform', `translate(${CanvasSystem.offsetX}, ${CanvasSystem.offsetY}) scale(${CanvasSystem.zoom})`);
   },
 
